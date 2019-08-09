@@ -88,17 +88,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
             break;
         }
 
-        /* Check to see if we ran out of time waiting for input */
-        if (menu->ShouldBootDefault())
-        {
-            int entry = display->GetSelectedItem();
-            path = menu->GetEntryPath(entry);
-            break;
-        }
-
-        /* Check to see if the user confirmed a selection */
-        if (io->ButtonPressed(BUTTON_1P_START) || io->ButtonPressed(BUTTON_2P_START))
-        {
+        /* Check to see if we ran out of time waiting for input, and to see
+           if the user confirmed a selection */
+        if (
+            menu->ShouldBootDefault() ||
+            io->ButtonPressed(BUTTON_1P_START) ||
+            io->ButtonPressed(BUTTON_2P_START)
+        ) {
             int entry = display->GetSelectedItem();
             path = menu->GetEntryPath(entry);
             break;
