@@ -150,7 +150,7 @@ void IO::GetVersion()
     unsigned int actual = ExchangeP3IO(outbuf, 1, inbuf, 20);
 
     // Don't need to do anything with the version response. On actual
-    // cabinets, this is 9 bytes long and looks similar to this response:
+    // cabinets, this is 8 bytes long and looks similar to this response:
     // 0x01 0x47 0x33 0x32 0x00 0x02 0x02 0x06
     if (actual == 0)
     {
@@ -169,7 +169,7 @@ void IO::SetMode()
     unsigned int actual = ExchangeP3IO(outbuf, 1, inbuf, 2);
 
     // Don't care about response, only log if we got incorrect mode length.
-    // On actual cabinets this is 3 bytes long and looks similar to this:
+    // On actual cabinets this is 2 bytes long and looks similar to this:
     // 0x2F 0x00
     if (actual != 2)
     {
@@ -339,17 +339,42 @@ unsigned int IO::ExchangeP3IO(unsigned char *outbuf, unsigned int outlen, unsign
     /* Write it out */
     DWORD actual = 0;
     WriteFile(p3io, realoutbuf, loc, &actual, 0);
+    FlushFileBuffers(p3io);
     free(realoutbuf);
 
+    if (actual != loc)
+    {
+        fprintf(stderr, "Failed to output correct amount of data to P3IO!\n");
+        return 0;
+    }
+
     /* Read in the response */
-    unsigned char *realinbuf = (unsigned char *)malloc((inlen * 2) + 2);
-    ReadFile(p3io, realinbuf, (inlen * 2) + 2, &actual, 0);
+    unsigned char *realinbuf = (unsigned char *)malloc((inlen * 2) + 64);
+    ReadFile(p3io, realinbuf, (inlen * 2) + 64, &actual, 0);
     loc = 0;
 
-    if (realinbuf[loc++] != 0xAA)
+    while (true)
     {
-        /* Malformed response */
-        fprintf(stderr, "Got malformed response from P3IO!\n");
+        if (loc >= actual)
+        {
+            /* Never found the packet */
+            fprintf(stderr, "Failed to find SOM in response from P3IO!\n");
+            free(realinbuf);
+            return 0;
+        }
+
+        if (realinbuf[loc++] == 0xAA)
+        {
+            /* Got SOM */
+            break;
+        }
+    }
+
+    if (loc >= actual)
+    {
+        /* Not enough data */
+        fprintf(stderr, "Failed to find length byte in response from P3IO!\n");
+        free(realinbuf);
         return 0;
     }
 
@@ -362,6 +387,19 @@ unsigned int IO::ExchangeP3IO(unsigned char *outbuf, unsigned int outlen, unsign
 
     for (unsigned int i = 0; i < inlen; i++)
     {
+        if (i >= realLen)
+        {
+            /* We finished decoding the packet */
+            break;
+        }
+        if (loc >= actual)
+        {
+            /* Not enough data */
+            fprintf(stderr, "Ran out of data in response from P3IO!\n");
+            free(realinbuf);
+            return 0;
+        }
+
         if (realinbuf[loc] == 0xFF)
         {
             /* Unescape this byte */
@@ -398,6 +436,7 @@ bool IO::ExchangeEXTIO(unsigned int message)
     /* Send it */
     DWORD actual = 0;
     WriteFile(extio, outbuf, 4, &actual, 0);
+    FlushFileBuffers(extio);
     if (actual != 4)
     {
         fprintf(stderr, "Failed to write to EXTIO!\n");
