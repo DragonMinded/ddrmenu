@@ -13,10 +13,10 @@ launch=D:\2014\contents\gamestart.bat
 [2013]
 launch=D:\2013\contents\gamestart.bat
 
-[X3]
+[X3 Vs. 2nd Mix]
 launch=D:\X3\contents\gamestart.bat
 
-[X2 Vs. 2nd Mix]
+[X2]
 launch=D:\X2\contents\gamestart.bat
 ```
 
