@@ -17,27 +17,27 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     int argc;
     argv = CommandLineToArgvW(GetCommandLine(), &argc);
 
-	/* Ensure command is good */
+    /* Ensure command is good */
     if( argc < 2 )
     {
-		MessageBox(
-			NULL,
-			(LPCWSTR)L"Missing ini file argument!",
-			(LPCWSTR)L"Invalid Invocation",
-			MB_ICONERROR | MB_OK | MB_DEFBUTTON1
-		);
-		return 1;
+        MessageBox(
+            NULL,
+            (LPCWSTR)L"Missing ini file argument!",
+            (LPCWSTR)L"Invalid Invocation",
+            MB_ICONERROR | MB_OK | MB_DEFBUTTON1
+        );
+        return 1;
     }
 
-	if( argc > 2 )
-	{
-		MessageBox(
-			NULL,
-			(LPCWSTR)L"Too many arguments specified!",
-			(LPCWSTR)L"Invalid Invocation",
-			MB_ICONERROR | MB_OK | MB_DEFBUTTON1
-		);
-		return 1;
+    if( argc > 2 )
+    {
+        MessageBox(
+            NULL,
+            (LPCWSTR)L"Too many arguments specified!",
+            (LPCWSTR)L"Invalid Invocation",
+            MB_ICONERROR | MB_OK | MB_DEFBUTTON1
+        );
+        return 1;
     }
 
     // Initialize the IO
@@ -55,11 +55,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if( menu->NumberOfEntries() < 1 )
     {
         MessageBox(
-			NULL,
-			(LPCWSTR)L"No games configured to launch!",
-			(LPCWSTR)L"Invalid Invocation",
-			MB_ICONERROR | MB_OK | MB_DEFBUTTON1
-		);
+            NULL,
+            (LPCWSTR)L"No games configured to launch!",
+            (LPCWSTR)L"Invalid Invocation",
+            MB_ICONERROR | MB_OK | MB_DEFBUTTON1
+        );
 
         delete menu;
         delete io;
@@ -67,8 +67,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         return 1;
     }
 
-	/* Create menu screen */
-	Display *display = new Display(hInstance, io, menu);
+    /* Create menu screen */
+    Display *display = new Display(hInstance, io, menu);
 
     /* Actual game to load */
     char *path = NULL;

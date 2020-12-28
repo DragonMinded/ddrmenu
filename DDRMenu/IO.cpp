@@ -61,7 +61,7 @@ IO::IO()
         SetupDiDestroyDeviceInfoList(devinfo);
         return;
     }
-    
+
     /* Successfully opened P3IO! */
     free(detailData);
     SetupDiDestroyDeviceInfoList(devinfo);
@@ -80,17 +80,17 @@ IO::IO()
         params.Parity = NOPARITY;
 
         /* Copypasta that works */
-	    params.fOutxCtsFlow = 0;
-	    params.fOutxDsrFlow = 0;
-	    params.fDtrControl = DTR_CONTROL_DISABLE;
-	    params.fDsrSensitivity = 0;
-	    params.fOutX = 0;
-	    params.fInX = 0;
-	    params.fRtsControl = RTS_CONTROL_DISABLE;
-        
+        params.fOutxCtsFlow = 0;
+        params.fOutxDsrFlow = 0;
+        params.fDtrControl = DTR_CONTROL_DISABLE;
+        params.fDsrSensitivity = 0;
+        params.fOutX = 0;
+        params.fInX = 0;
+        params.fRtsControl = RTS_CONTROL_DISABLE;
+
         /* Set up the COM1 params */
         SetCommState(extio, &params);
-        
+
         COMMTIMEOUTS timeouts = { 0 };
         timeouts.ReadTotalTimeoutConstant = 0;
         timeouts.WriteTotalTimeoutConstant = 0;
@@ -102,7 +102,7 @@ IO::IO()
         SetCommTimeouts(extio, &timeouts);
 
         /* Start fresh */
-	    PurgeComm( extio, PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR );
+        PurgeComm( extio, PURGE_RXABORT | PURGE_RXCLEAR | PURGE_TXABORT | PURGE_TXCLEAR );
     }
 
     /* Looks good! */
@@ -512,8 +512,8 @@ unsigned int IO::GetButtonsHeld()
     {
         newbuttons |= BUTTON_1P_RIGHT;
     }
-   
-    /* 2P Pad inputs */ 
+
+    /* 2P Pad inputs */
     if (buttonbuf[1] & 0x02)
     {
         newbuttons |= BUTTON_2P_UP;
@@ -548,7 +548,7 @@ unsigned int IO::GetButtonsHeld()
     {
         newbuttons |= BUTTON_1P_MENURIGHT;
     }
-    
+
     /* 2P Menu inputs */
     if (buttonbuf[3] & 0x04)
     {
@@ -566,7 +566,7 @@ unsigned int IO::GetButtonsHeld()
     {
         newbuttons |= BUTTON_2P_MENURIGHT;
     }
-    
+
     /* Start inputs */
     if (buttonbuf[0] & 0x01)
     {
@@ -576,7 +576,7 @@ unsigned int IO::GetButtonsHeld()
     {
         newbuttons |= BUTTON_2P_START;
     }
-    
+
     /* Cabinet buttons */
     if (buttonbuf[2] & 0x20)
     {
@@ -601,7 +601,7 @@ void IO::Tick()
     // Remember last buttons so we can calculate newly
     // pressed buttons.
     lastButtons = buttons;
-   
+
     // Poll the JAMMA edge to get current held buttons
     buttons = GetButtonsHeld();
 }
