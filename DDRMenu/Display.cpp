@@ -9,6 +9,7 @@ Menu *globalMenu;
 int globalResX, globalResY;
 bool globalQuit;
 unsigned int globalSelected;
+unsigned int globalTimeRemain;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -82,6 +83,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 delete wString;
             }
 
+            /* Draw text */
+            RECT rect;
+            rect.top = globalResY - ITEM_PADDING - ITEM_HEIGHT;
+            rect.bottom = globalResY ;
+            rect.left = globalResX - 50;
+            rect.right = globalResX - ITEM_PADDING;
+            
+            wchar_t* wString = new wchar_t[32];
+            swprintf(wString, _T("%d s"), globalTimeRemain);
+            DrawText(hdc, wString, -1, &rect, DT_SINGLELINE | DT_NOCLIP | DT_RIGHT | DT_VCENTER);
+
             DeleteObject(hFont);
 
             /* Copy double-buffer over */
@@ -123,6 +135,7 @@ Display::Display(HINSTANCE hInstance, IO *ioInst, Menu *mInst)
     globalQuit = false;
     globalSelected = 0;
     selected = 0;
+    globalTimeRemain = TIMEOUT_SECONDS;
     menu = mInst;
     io = ioInst;
 
@@ -149,8 +162,10 @@ Display::~Display(void)
     UnregisterClass(CLASS_NAME, inst);
 }
 
-void Display::Tick(void)
+bool Display::Tick(unsigned int newTimeRemain)
 {
+    bool rtnVal = false;
+
     /* Firat, handle inputs */
     if (io->ButtonPressed(BUTTON_1P_MENULEFT) || io->ButtonPressed(BUTTON_2P_MENULEFT))
     {
@@ -167,12 +182,19 @@ void Display::Tick(void)
         }
     }
 
+    // return true if the user has changed the selection
+    // to reset the timer.
+    rtnVal = (globalSelected != selected);
+
     /* Now, handle whether we should repaint */
-    if (globalSelected != selected)
+    // repaint on reselection or timer change.
+    if (globalSelected != selected || globalTimeRemain != newTimeRemain)
     {
         globalSelected = selected;
         InvalidateRect(hwnd, NULL, FALSE);
         UpdateWindow(hwnd);
+
+        globalTimeRemain = newTimeRemain;
     }
 
     /* Now, handle repainting */
@@ -182,6 +204,8 @@ void Display::Tick(void)
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    return rtnVal;
 }
 
 bool Display::WasClosed()
