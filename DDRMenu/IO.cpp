@@ -120,6 +120,7 @@ IO::IO()
     GetCoinstock();
     GetCabType(0);
     SetLights(0);
+    FeedWatchdog();
 }
 
 IO::~IO()
@@ -132,8 +133,13 @@ IO::~IO()
         CloseHandle(extio);
     }
 
-    // Kill the handle to the file that we have
+    //clear lights on exit.
     SetLights(0);
+
+    //feed the dog to give the next program the most amount of time to continue feeding it.
+    FeedWatchdog();
+
+    // Kill the handle to the file that we have
     CloseHandle(p3io);
     is_ready = false;
 }
@@ -206,6 +212,25 @@ unsigned int IO::GetCabType(unsigned int request)
     }
 }
 
+void IO::FeedWatchdog()
+{
+    //cmd 0x05 "watchdog set time in sec", parameter in sec.
+    unsigned char outbuf[2] = { 0x05, WATCHDOG_FEED_S };
+    unsigned char inbuf[2] = { 0x00 };
+    unsigned int actual = ExchangeP3IO(outbuf, 2, inbuf, 2);
+
+    if (actual != 2)
+    {
+        //check to make sure the p3io responds
+        fprintf(stderr, "Got unexpected size %d back from watchdog request!\n", actual);
+    }
+    else if (inbuf[0] != outbuf[0])
+    {
+        //check to make sure the p3io responds to the same cmd we sent it.
+        fprintf(stderr, "Got unexpected response from watchdog request!\n");
+    }
+}
+
 void IO::SetLights(unsigned int lights)
 {
     /* Mask off the lights bits for each part */
@@ -257,6 +282,9 @@ void IO::SetLights(unsigned int lights)
         ExchangeEXTIO(padlights);
         lastpadlights = padlights;
     }
+
+    //we update the lights ~1s, so this is a good timer to feed our lovely watchdog.
+    FeedWatchdog();
 }
 
 coincount IO::GetCoinstock()
