@@ -57,6 +57,9 @@
 
 #define LIGHT_BASS_NEONS 0x00400000
 
+//time for watchdog to be reset every time
+#define WATCHDOG_FEED_S 180
+
 typedef struct {
     unsigned int slot1;
     unsigned int slot2;
@@ -77,6 +80,7 @@ public:
     void SetLights(unsigned int lights);
     void LightOn(unsigned int light);
     void LightOff(unsigned int light);
+    void FeedWatchdog();
 private:
     HANDLE p3io;
     HANDLE extio;

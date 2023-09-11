@@ -18,7 +18,7 @@ public:
     Display(HINSTANCE hInstance, IO *io, Menu *mInst);
     ~Display();
 
-    void Tick();
+    bool Tick(unsigned int newTimeRemain);
     bool WasClosed();
 
     unsigned int GetSelectedItem();

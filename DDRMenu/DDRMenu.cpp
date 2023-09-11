@@ -80,7 +80,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     while(true) {
         io->Tick();
         menu->Tick();
-        display->Tick();
+        
+        if(display->Tick(menu->SecondsLeft()))
+        {
+            menu->ResetTimeout();
+        }
 
         /* See if somebody killed the display window */
         if (display->WasClosed())
@@ -127,7 +131,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         HANDLE hBat = CreateFileA(tempPath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
         char command[MAX_GAME_LOCATION_LENGTH + 128];
-        sprintf_s(command, MAX_GAME_LOCATION_LENGTH + 128, "ping 127.0.0.1 -n 5 -w 1000 > nul\r\n%s\r\n", path);
+        sprintf_s(command, MAX_GAME_LOCATION_LENGTH + 128, "echo off\r\ncls\r\nping 127.0.0.1 -n 5 -w 1000 > nul\r\n%s\r\n", path);
         DWORD bytesWritten;
         WriteFile(hBat, command, strlen(command), &bytesWritten, NULL);
         CloseHandle(hBat);
